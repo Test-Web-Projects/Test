@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+  <title>Chat Semplice</title>
+  <style>
+    body {
+      font-family: "bodyfont", sans-serif;
+      background-color: #2e2e2e;
+      color: #f2f2f2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 97vh;
+    }
+  </style>
+</head>
+<body>
+  <div class="chat_container">
+    <div class="chat_header">
+      <div class="chat_title" id="chatTitle">💬</div>
+      <button class="butEsci" onclick=extiChat(event)>EXIT</button>
+    </div>
+    <div class="messages" id="chat"></div>
+    <div class="input-container">
+        <input type="text" id="messageInput" placeholder="Scrivi un messaggio..." />
+        <button type="submit" onclick="sendMessage()">Invia</button>
+    </div>
+  </div>
+
+  <script>
+    const chat = document.getElementById('chat');
+    const username = localStorage.getItem("chatUsername");
+    const roomCode = localStorage.getItem('chatRoom');
+    document.getElementById('chatTitle').textContent = `chat: ${roomCode + "💬"}`;
+
+    const shownMessages = new Set();
+
+    // 🔒 Escape di HTML per evitare XSS
+    function escapeHTML(str) {
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    // 🔁 Format del messaggio: escape + sostituzione <br>
+    function formatMessage(rawMsg) {
+      const safe = escapeHTML(rawMsg);
+      return safe.replace(/&lt;br&gt;/g, "<br>"); // consente di mantenere i <br> scritti come testo
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('messageInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const timestamp = new Date().toLocaleTimeString();
+      const message = `${timestamp}<br>${username}: ${text}`;
+
+      fetch('/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `username=${encodeURIComponent(username)}&room=${encodeURIComponent(roomCode)}&message=${encodeURIComponent(message)}`
+      });
+
+      input.value = '';
+    }
+
+    function pollMessages() {
+      fetch(`/poll?room=${encodeURIComponent(roomCode)}`)
+        .then(response => response.text())
+        .then(data => {
+          const messages = data.trim().split('\n');
+
+          messages.forEach(msg => {
+            if (msg.trim() === '') return;
+
+            if (!shownMessages.has(msg)) {
+              shownMessages.add(msg);
+
+              const cont_messageU = document.createElement('div');
+              cont_messageU.className = 'blocco_messaggi';
+
+              const userMessage = document.createElement('div');
+              if (msg.includes(username)) {
+                userMessage.className = 'message user';
+              } else {
+                userMessage.className = 'message other';
+              }
+
+              userMessage.innerHTML = formatMessage(msg); // Usa innerHTML in sicurezza
+              cont_messageU.appendChild(userMessage);
+              chat.appendChild(cont_messageU);
+
+              chat.scrollTop = chat.scrollHeight;
+            }
+          });
+        });
+    }
+
+    setInterval(pollMessages, 1000);
+
+    function extiChat() {
+      window.location.href = 'index.html';
+    }
+  </script>
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    html, body {
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'bodyfont', sans-serif;
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .login-container {
+        background-color: rgba(30, 30, 30, 0.95);
+        padding: 45px;
+        padding-top: 30px;
+        border-radius: 12px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+        width: 90%;
+        max-width: 400px;
+        text-align: center;
+    }
+  </style>
+
+</head>
+<body>
+
+  <h1 class="titolo">ChatRoom</h1>
+  <video src="video/202302062133.mp4" muted autoplay loop></video>
+  <div class="login-container">
+    <h2>Accedi ad un account</h2>
+    <form id="loginForm" onsubmit="joinChat(event)" action="/ChatServer/">
+      <input class="normal" type="text" id="username" placeholder="Username" required />
+      <div class="input_password">
+        <input type="password" id="password" placeholder="Password" required />
+        <img id="eyeicon" src="immagini/view.png" alt="">
+      </div>
+      <button type="submit">Entra</button>
+    </form>
+  </div>
+
+   <script>
+
+    function joinChat(event) {
+      event.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+      if (username && password) {
+        localStorage.setItem('chatUsername', username);
+        localStorage.setItem('password', password);
+        window.location.href = 'index.html';
+      }
+    }
+
+    let eyeicon = document.getElementById('eyeicon');
+    let password1 = document.getElementById('password');
+
+    eyeicon.onclick = function() {
+      if(password1.type == "password"){
+        password1.type = "text";
+        eyeicon.src = "immagini/hide.png";
+      }else{
+        password1.type = "password";
+        eyeicon.src = "immagini/view.png";
+      }
+    }
+   </script>
+
+</body>
+</html>
