@@ -4,7 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="style.css" />
-  <title>SeleniChat</title>
+  <link rel="icon" href="immagini/ChatGPT Image 24 mag 2025, 16_00_40.ico">
+  <title>Chat - SELENICHAT</title>
   <style>
     body {
       font-family: "bodyfont", sans-serif;
@@ -39,12 +40,12 @@
 
     const shownMessages = new Set();
 
-    // 🔒 Escape di HTML per evitare XSS
+    // Escape di HTML 
     function escapeHTML(str) {
       return str
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
+        .replace(/>/g, "&gt;")
     }
 
     // 🔁 Format del messaggio: escape + sostituzione <br>
@@ -73,7 +74,7 @@
     // Permette l'invio del messaggio con il tasto Invio
     document.getElementById('messageInput').addEventListener('keydown', function (event) {
         if (event.key === 'Enter') {
-            event.preventDefault(); // evita il comportamento predefinito (es. newline)
+            event.preventDefault();
             sendMessage();
           }
     });
@@ -86,7 +87,7 @@
 
           messages.forEach(msg => {
             if (msg.trim() === '') return;
-
+            
             if (!shownMessages.has(msg)) {
               shownMessages.add(msg);
 
@@ -100,7 +101,13 @@
                 userMessage.className = 'message other';
               }
 
-              userMessage.innerHTML = formatMessage(msg); // Usa innerHTML in sicurezza
+              let formatted = formatMessage(msg);
+              const match = formatted.match(/<br>([^:]+):/);
+              const user = match[1];
+              formatted = formatted.replace(`${user}:`, `<span class="username">${user}</span>:`);
+              
+
+              userMessage.innerHTML = formatted;
               cont_messageU.appendChild(userMessage);
               chat.appendChild(cont_messageU);
 
