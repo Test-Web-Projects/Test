@@ -185,6 +185,24 @@ video{
   background-color: #218838;
 }
 
+.freccia{
+    position: fixed;
+    top: 5rem;
+    left: 3.2rem;
+    z-index: 9999;
+    animation: left 1s infinite ease-in-out;
+}
+.freccia img{
+    max-width: 2rem;
+    height: auto;
+    transition: all 0.5s;
+}
+@keyframes left{
+    0%{margin-top:0;}
+    50%{margin-left:5px;}
+    100%{margin-top:0;}
+}
+
 /* INDEX */
 
 .titolo {
