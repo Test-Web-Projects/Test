@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="style.css" />
-  <title>Chat Semplice</title>
+  <title>SeleniChat</title>
   <style>
     body {
       font-family: "bodyfont", sans-serif;
@@ -18,16 +18,16 @@
   </style>
 </head>
 <body>
-  <a href="index.html" class="freccia"><img src="immagini/long-arrow-pointing-to-left.png" alt=""></a>
+  <video src="video/video_chat.mp4" muted autoplay loop></video>
   <div class="chat_container">
     <div class="chat_header">
-      <div class="chat_title" id="chatTitle">💬</div>
+      <div class="chat_title" id="chatTitle"></div>
       <button class="butEsci" onclick=extiChat(event)>EXIT</button>
     </div>
     <div class="messages" id="chat"></div>
     <div class="input-container">
         <input type="text" id="messageInput" placeholder="Scrivi un messaggio..." />
-        <button type="submit" onclick="sendMessage()">Invia</button>
+        <div class="div_bottone"><button type="submit" class="butInvia" onclick="sendMessage()"><img src="immagini/communication.png" alt=""></button></div>
     </div>
   </div>
 
@@ -35,7 +35,7 @@
     const chat = document.getElementById('chat');
     const username = localStorage.getItem("chatUsername");
     const roomCode = localStorage.getItem('chatRoom');
-    document.getElementById('chatTitle').textContent = `chat: ${roomCode + "💬"}`;
+    document.getElementById('chatTitle').textContent = `CHAT: ${roomCode + "💬"}`;
 
     const shownMessages = new Set();
 
@@ -70,6 +70,14 @@
       input.value = '';
     }
 
+    // Permette l'invio del messaggio con il tasto Invio
+    document.getElementById('messageInput').addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') {
+            event.preventDefault(); // evita il comportamento predefinito (es. newline)
+            sendMessage();
+          }
+    });
+
     function pollMessages() {
       fetch(`/poll?room=${encodeURIComponent(roomCode)}`)
         .then(response => response.text())
@@ -102,7 +110,7 @@
         });
     }
 
-    setInterval(pollMessages, 1000);
+    setInterval(pollMessages, 500);
 
     function extiChat() {
       window.location.href = 'index.html';
