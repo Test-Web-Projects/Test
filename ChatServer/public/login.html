@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Login - SELENICHAT</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="icon" href="immagini/ChatGPT Image 24 mag 2025, 16_00_40.ico">
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="immagini/ChatGPT Image 24 mag 2025, 16_00_40.ico" />
   <style>
     html, body {
       height: 100vh;
@@ -23,60 +22,96 @@
       align-items: center;
     }
     .login-container {
-        background-color: rgba(30, 30, 30, 0.95);
-        padding: 45px;
-        padding-top: 30px;
-        border-radius: 12px;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
-        width: 90%;
-        max-width: 400px;
-        text-align: center;
+      background-color: rgba(30, 30, 30, 0.95);
+      padding: 45px;
+      padding-top: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
     }
+    
   </style>
-
 </head>
 <body>
 
   <h1 class="titolo">SeleniChat</h1>
   <video src="video/202302062133.mp4" muted autoplay loop></video>
+
   <div class="login-container">
     <h2>Accedi o Registrati</h2>
-    <form id="loginForm" onsubmit="joinChat(event)" action="/ChatServer/">
+    <form id="loginForm">
       <input class="normal" type="text" id="username" placeholder="Username" required />
       <div class="input_password">
         <input type="password" id="password" placeholder="Password" required />
-        <img id="eyeicon" src="immagini/view.png" alt="">
+        <img id="eyeicon" src="immagini/view.png" alt="Mostra/Nascondi password" style="cursor:pointer;" />
       </div>
       <button type="submit">Login</button>
     </form>
+    <div id="message"></div>
   </div>
 
-   <script>
+  <script>
+    const form = document.getElementById('loginForm');
+    const messageDiv = document.getElementById('message');
+    const eyeicon = document.getElementById('eyeicon');
+    const passwordInput = document.getElementById('password');
 
-    function joinChat(event) {
-      event.preventDefault();
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value.trim();
-      if (username && password) {
-        localStorage.setItem('chatUsername', username);
-        localStorage.setItem('password', password);
-        window.location.href = 'index.html';
-      }
-    }
-
-    let eyeicon = document.getElementById('eyeicon');
-    let password1 = document.getElementById('password');
-
-    eyeicon.onclick = function() {
-      if(password1.type == "password"){
-        password1.type = "text";
+    // Mostra/nascondi password
+    eyeicon.onclick = () => {
+      if (passwordInput.type === "password") {
+        passwordInput.type = "text";
         eyeicon.src = "immagini/hide.png";
-      }else{
-        password1.type = "password";
+      } else {
+        passwordInput.type = "password";
         eyeicon.src = "immagini/view.png";
       }
-    }
-   </script>
+    };
+
+    // Gestione submit form: login/registrazione
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+
+      const data = new URLSearchParams();
+      data.append('username', username);
+      data.append('password', password);
+
+      try {
+        const response = await fetch('/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: data.toString()
+        });
+
+        const text = await response.text();
+
+        if (response.ok) {
+          messageDiv.textContent = text;
+
+          // Salvo solo username (non password) in localStorage
+          localStorage.setItem('chatUsername', username);
+
+          // Dopo 1.5 secondi redirect a index.html (chat vera)
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 1500);
+
+        } else {
+          messageDiv.textContent = text;
+        }
+      } catch (err) {
+        messageDiv.style.color = 'red';
+        messageDiv.textContent = 'Errore di connessione al server';
+        console.error(err);
+      }
+    });
+  </script>
 
 </body>
 </html>

@@ -3,24 +3,27 @@ import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
+import java.security.MessageDigest;
 import java.util.*;
 import java.util.concurrent.*;
 
 public class ChatServer {
     private static final int PORT = 8080;
     private static final String PUBLIC_DIR = "public";
+
+    // Mappa dei messaggi per stanza
     private static final Map<String, List<String>> rooms = new ConcurrentHashMap<>();
 
     public static void main(String[] args) throws IOException {
-        HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
+        HttpServer server = HttpServer.create(new InetSocketAddress(PORT), 0);
 
+        // Endpoint per inviare messaggi
         server.createContext("/send", exchange -> {
             if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
-                String body = new String(exchange.getRequestBody().readAllBytes());
+                String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
                 String[] parts = body.split("&");
                 String room = getValue(parts, "room");
                 String message = getValue(parts, "message");
-
 
                 if (room != null && message != null) {
                     rooms.computeIfAbsent(room, k -> new CopyOnWriteArrayList<>()).add(message);
@@ -33,6 +36,7 @@ public class ChatServer {
             }
         });
 
+        // Endpoint per ricevere messaggi
         server.createContext("/poll", exchange -> {
             if ("GET".equalsIgnoreCase(exchange.getRequestMethod())) {
                 String query = exchange.getRequestURI().getQuery();
@@ -58,7 +62,72 @@ public class ChatServer {
             }
         });
 
-        // Serve file statici
+        // Endpoint login e registrazione
+        server.createContext("/login", exchange -> {
+            if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+                String[] parts = body.split("&");
+                String username = getValue(parts, "username");
+                String password = getValue(parts, "password");
+
+                if (username != null && password != null) {
+                    synchronized (ChatServer.class) {
+                        // Assicuro che la cartella data esista
+                        File dataDir = new File("data");
+                        if (!dataDir.exists()) {
+                            boolean createdDir = dataDir.mkdirs();
+                            System.out.println("Cartella data creata? " + createdDir);
+                        }
+
+                        // File utenti.txt
+                        File userFile = new File(dataDir, "utenti.txt");
+                        if (!userFile.exists()) {
+                            boolean createdFile = userFile.createNewFile();
+                            System.out.println("File utenti.txt creato? " + createdFile);
+                        }
+
+                        System.out.println("File utenti.txt usato: " + userFile.getAbsolutePath());
+
+                        // Leggo utenti esistenti
+                        Map<String, String> users = new HashMap<>();
+                        try (BufferedReader reader = new BufferedReader(new FileReader(userFile))) {
+                            String line;
+                            while ((line = reader.readLine()) != null) {
+                                String[] kv = line.split(":");
+                                if (kv.length == 2) {
+                                    users.put(kv[0], kv[1]);
+                                }
+                            }
+                        }
+
+                        String passwordHash = hashPassword(password);
+
+                        if (users.containsKey(username)) {
+                            // Utente esistente → controllo password
+                            if (users.get(username).equals(passwordHash)) {
+                                sendText(exchange, "✔️ Login avvenuto con successo");
+                            } else {
+                                sendText(exchange, "❌ Username o Password errati", 401);
+                            }
+                        } else {
+                            // Nuovo utente → registro
+                            System.out.println("Aggiungo utente: " + username);
+                            try (BufferedWriter writer = new BufferedWriter(new FileWriter(userFile, true))) {
+                                writer.write(username + ":" + passwordHash);
+                                writer.newLine();
+                            }
+                            sendText(exchange, "User registered successfully");
+                        }
+                    }
+                } else {
+                    sendText(exchange, "Missing username or password", 400);
+                }
+            } else {
+                exchange.sendResponseHeaders(405, -1);
+            }
+        });
+
+        // Serve file statici (html, js, css)
         server.createContext("/", exchange -> {
             URI uri = exchange.getRequestURI();
             String path = uri.getPath();
@@ -79,6 +148,7 @@ public class ChatServer {
         server.setExecutor(Executors.newCachedThreadPool());
         server.start();
         System.out.println("✅ Server in esecuzione su http://" + getLocalIP() + ":" + PORT);
+
     }
 
     private static String getValue(String[] pairs, String key) {
@@ -96,8 +166,8 @@ public class ChatServer {
     }
 
     private static void sendText(HttpExchange exchange, String response, int statusCode) throws IOException {
-        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*"); // per JS cross-origin
-        byte[] bytes = response.getBytes();
+        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*"); // CORS
+        byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
         exchange.sendResponseHeaders(statusCode, bytes.length);
         try (OutputStream os = exchange.getResponseBody()) {
             os.write(bytes);
@@ -108,6 +178,20 @@ public class ChatServer {
         try (final DatagramSocket socket = new DatagramSocket()) {
             socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
             return socket.getLocalAddress().getHostAddress();
+        }
+    }
+
+    private static String hashPassword(String password) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                hexString.append(String.format("%02x", b));
+            }
+            return hexString.toString();
+        } catch (Exception e) {
+            throw new RuntimeException("Errore hash password", e);
         }
     }
 }
