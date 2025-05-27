@@ -353,8 +353,18 @@ video{
   box-shadow: -2px 2px 10px #07e6de;
 }
 
-/*
+.system-message{
+  margin: 0 auto;
+  display: block;
+  text-align: center;
+  font-family: "korcy";
+  color: white;
+  font-size: 0.85rem;
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
 
+/*
 @media only screen {
 
   body{

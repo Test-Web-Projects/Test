@@ -18,7 +18,7 @@
     }
   </style>
 </head>
-<body>
+<body onpageshow="entra()">
   <video src="video/video_chat.mp4" muted autoplay loop></video>
   <div class="chat_container">
     <div class="chat_header">
@@ -36,6 +36,19 @@
     const chat = document.getElementById('chat');
     const username = localStorage.getItem("chatUsername");
     const roomCode = localStorage.getItem('chatRoom');
+
+    function entra () {
+      const timestamp = new Date().toLocaleTimeString();
+      const systemMessage = `[SYSTEM] ${username} è entrato nella chat`;
+
+      fetch('/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `username=system&room=${encodeURIComponent(roomCode)}&message=${encodeURIComponent(systemMessage)}`
+      });
+    }
+        
+    
     document.getElementById('chatTitle').textContent = `SeleniChat: ${roomCode + "💬"}`;
 
     const shownMessages = new Set();
@@ -91,6 +104,15 @@
             if (!shownMessages.has(msg)) {
               shownMessages.add(msg);
 
+              if (msg.includes('[SYSTEM]')) {
+                const systemDiv = document.createElement('div');
+                systemDiv.className = 'system-message';
+                systemDiv.innerHTML = formatMessage(msg);
+                chat.appendChild(systemDiv);
+                chat.scrollTop = chat.scrollHeight;
+                return;
+              }
+
               const cont_messageU = document.createElement('div');
               cont_messageU.className = 'blocco_messaggi';
 
@@ -120,8 +142,17 @@
     setInterval(pollMessages, 500);
 
     function extiChat() {
-      window.location.href = 'index.html';
-    }
+      const systemMessage = `[SYSTEM] ${username} è uscito dalla chat`;
+
+      fetch('/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `username=system&room=${encodeURIComponent(roomCode)}&message=${encodeURIComponent(systemMessage)}`
+      }).finally(() => {
+          window.location.href = 'index.html';
+        });
+      }
+
   </script>
 
 </script>

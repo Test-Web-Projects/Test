@@ -7,6 +7,7 @@ import java.security.MessageDigest;
 import java.util.*;
 import java.util.concurrent.*;
 
+
 public class ChatServer {
     private static final int PORT = 8080;
     private static final String PUBLIC_DIR = "public";
@@ -98,15 +99,13 @@ public class ChatServer {
 
                         String passwordHash = hashPassword(password);
 
-                        if (users.containsKey(username)) {
-                            // Utente esistente → controllo password
+                        if (users.containsKey(username)) { //Utente gia registrato
                             if (users.get(username).equals(passwordHash)) {
                                 sendText(exchange, "✔️ Login avvenuto con successo");
                             } else {
                                 sendText(exchange, "❌ Username o Password errati", 401);
                             }
-                        } else {
-                            // Nuovo utente → registro
+                        } else { //Utente non registrato
                             System.out.println("Aggiungo utente: " + username);
                             try (BufferedWriter writer = new BufferedWriter(new FileWriter(userFile, true))) {
                                 writer.write(username + ":" + passwordHash);
