@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="style.css" />
-  <link rel="icon" href="immagini/ChatGPT Image 24 mag 2025, 16_00_40.ico">
+  <link rel="icon" href="immagini/Icona.ico">
   <title>Chat - SELENICHAT</title>
   <style>
     body {
@@ -18,12 +18,12 @@
     }
   </style>
 </head>
-<body onpageshow="entra()">
+<body onload="entra()">
   <video src="video/video_chat.mp4" muted autoplay loop></video>
   <div class="chat_container">
     <div class="chat_header">
       <div class="chat_title" id="chatTitle"></div>
-      <button class="butEsci" onclick=extiChat(event)>EXIT</button>
+      <button class="butEsci" onclick=extiChat()>EXIT</button>
     </div>
     <div class="messages" id="chat"></div>
     <div class="input-container">
@@ -38,13 +38,30 @@
     const roomCode = localStorage.getItem('chatRoom');
 
     function entra () {
+      if (sessionStorage.getItem("alreadyJoined") === "true") return;
+      sessionStorage.setItem("alreadyJoined", "true");
+
       const timestamp = new Date().toLocaleTimeString();
-      const systemMessage = `[SYSTEM] ${username} è entrato nella chat`;
+      const systemMessage = `[SYSTEM]${timestamp}<br>${username}: è entrato/a nella chat`;
 
       fetch('/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: `username=system&room=${encodeURIComponent(roomCode)}&message=${encodeURIComponent(systemMessage)}`
+      });
+    }
+
+    function extiChat() {
+      const timestamp = new Date().toLocaleTimeString();
+      const systemMessage = `[SYSTEM]${timestamp}<br>${username}: è uscito/a dalla chat`;
+
+      fetch('/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `username=system&room=${encodeURIComponent(roomCode)}&message=${encodeURIComponent(systemMessage)}`
+      }).finally(() => {
+          sessionStorage.removeItem("alreadyJoined");
+          window.location.href = 'index.html';
       });
     }
         
@@ -61,10 +78,10 @@
         .replace(/>/g, "&gt;")
     }
 
-    // 🔁 Format del messaggio: escape + sostituzione <br>
+    
     function formatMessage(rawMsg) {
       const safe = escapeHTML(rawMsg);
-      return safe.replace(/&lt;br&gt;/g, "<br>"); // consente di mantenere i <br> scritti come testo
+      return safe.replace(/&lt;br&gt;/g, "<br>"); 
     }
 
     function sendMessage() {
@@ -100,18 +117,25 @@
 
           messages.forEach(msg => {
             if (msg.trim() === '') return;
-            
-            if (!shownMessages.has(msg)) {
-              shownMessages.add(msg);
 
-              if (msg.includes('[SYSTEM]')) {
-                const systemDiv = document.createElement('div');
-                systemDiv.className = 'system-message';
-                systemDiv.innerHTML = formatMessage(msg);
-                chat.appendChild(systemDiv);
-                chat.scrollTop = chat.scrollHeight;
-                return;
-              }
+              if (!shownMessages.has(msg)) {
+                shownMessages.add(msg);
+
+                if (msg.includes('[SYSTEM]')) {
+                  const systemDiv = document.createElement('div');
+                  systemDiv.className = 'system-message';
+
+                  let formatted1 = formatMessage(msg);
+                  const match1 = formatted1.match(/<br>([^:]+):/);
+                  const user1 = match1[1];
+                  formatted1 = formatted1.replace(`${user1}:`, `<span class="username">${user1}</span>:`);
+                  formatted1 = formatted1.replace(`[SYSTEM]`, ``);
+
+                  systemDiv.innerHTML = formatted1;
+                  chat.appendChild(systemDiv);
+                  chat.scrollTop = chat.scrollHeight;
+                  return;
+                }
 
               const cont_messageU = document.createElement('div');
               cont_messageU.className = 'blocco_messaggi';
@@ -139,19 +163,9 @@
         });
     }
 
-    setInterval(pollMessages, 500);
+    setInterval(pollMessages, 100);
 
-    function extiChat() {
-      const systemMessage = `[SYSTEM] ${username} è uscito dalla chat`;
-
-      fetch('/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `username=system&room=${encodeURIComponent(roomCode)}&message=${encodeURIComponent(systemMessage)}`
-      }).finally(() => {
-          window.location.href = 'index.html';
-        });
-      }
+    
 
   </script>
 

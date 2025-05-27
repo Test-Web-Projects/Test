@@ -27,12 +27,8 @@ public class ChatServer {
                 String message = getValue(parts, "message");
                 System.out.println(parts[1] + " " + parts[2]);
 
-                if (room != null && message != null) {
-                    rooms.computeIfAbsent(room, k -> new CopyOnWriteArrayList<>()).add(message);
-                    sendText(exchange, "OK");
-                } else {
-                    sendText(exchange, "Missing room or message", 400);
-                }
+                rooms.computeIfAbsent(room, k -> new CopyOnWriteArrayList<>()).add(message);
+                sendText(exchange, "OK");
             }
         });
 
@@ -111,7 +107,7 @@ public class ChatServer {
                                 writer.write(username + ":" + passwordHash);
                                 writer.newLine();
                             }
-                            sendText(exchange, "☑️ User registered successfully");
+                            sendText(exchange, "☑️ Utente registrato con successo");
                         }
                     }
                 }

@@ -358,6 +358,7 @@ video{
   display: block;
   text-align: center;
   font-family: "korcy";
+  text-transform: uppercase;
   color: white;
   font-size: 0.85rem;
   margin-bottom: 20px;
