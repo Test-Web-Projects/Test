@@ -24,6 +24,7 @@ public class ChatServer {
                 String[] parts = body.split("&");
                 String room = getValue(parts, "room");
                 String message = getValue(parts, "message");
+                System.out.println(parts[1] + " " + parts[2]);
 
                 if (room != null && message != null) {
                     rooms.computeIfAbsent(room, k -> new CopyOnWriteArrayList<>()).add(message);
@@ -31,8 +32,6 @@ public class ChatServer {
                 } else {
                     sendText(exchange, "Missing room or message", 400);
                 }
-            } else {
-                exchange.sendResponseHeaders(405, -1);
             }
         });
 
@@ -72,21 +71,18 @@ public class ChatServer {
 
                 if (username != null && password != null) {
                     synchronized (ChatServer.class) {
-                        // Assicuro che la cartella data esista
                         File dataDir = new File("data");
                         if (!dataDir.exists()) {
-                            boolean createdDir = dataDir.mkdirs();
-                            System.out.println("Cartella data creata? " + createdDir);
+                            System.out.println("Cartella data inesistente ");
+                            return;
                         }
 
                         // File utenti.txt
                         File userFile = new File(dataDir, "utenti.txt");
                         if (!userFile.exists()) {
-                            boolean createdFile = userFile.createNewFile();
-                            System.out.println("File utenti.txt creato? " + createdFile);
+                            System.out.println("File utenti.txt inesistente ");
+                            return;
                         }
-
-                        System.out.println("File utenti.txt usato: " + userFile.getAbsolutePath());
 
                         // Leggo utenti esistenti
                         Map<String, String> users = new HashMap<>();
@@ -116,14 +112,10 @@ public class ChatServer {
                                 writer.write(username + ":" + passwordHash);
                                 writer.newLine();
                             }
-                            sendText(exchange, "User registered successfully");
+                            sendText(exchange, "☑️ User registered successfully");
                         }
                     }
-                } else {
-                    sendText(exchange, "Missing username or password", 400);
                 }
-            } else {
-                exchange.sendResponseHeaders(405, -1);
             }
         });
 

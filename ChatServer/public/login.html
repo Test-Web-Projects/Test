@@ -39,7 +39,7 @@
   <h1 class="titolo">SeleniChat</h1>
   <video src="video/202302062133.mp4" muted autoplay loop></video>
 
-  <div class="login-container">
+  <div class="login-container" id="login">
     <h2>Accedi o Registrati</h2>
     <form id="loginForm">
       <input class="normal" type="text" id="username" placeholder="Username" required />
@@ -48,13 +48,14 @@
         <img id="eyeicon" src="immagini/view.png" alt="Mostra/Nascondi password" style="cursor:pointer;" />
       </div>
       <button type="submit">Login</button>
+      <div id="message">❌Credenziali non messe</div>
     </form>
-    <div id="message"></div>
   </div>
 
   <script>
     const form = document.getElementById('loginForm');
     const messageDiv = document.getElementById('message');
+    messageDiv.style.opacity = "0";
     const eyeicon = document.getElementById('eyeicon');
     const passwordInput = document.getElementById('password');
 
@@ -73,8 +74,11 @@
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
 
+      
+
       const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value;
+      
 
       const data = new URLSearchParams();
       data.append('username', username);
@@ -93,6 +97,7 @@
 
         if (response.ok) {
           messageDiv.textContent = text;
+          messageDiv.style.opacity = "1";
 
           // Salvo solo username (non password) in localStorage
           localStorage.setItem('chatUsername', username);
@@ -100,10 +105,11 @@
           // Dopo 1.5 secondi redirect a index.html (chat vera)
           setTimeout(() => {
             window.location.href = 'index.html';
-          }, 1500);
+          }, 100);
 
         } else {
           messageDiv.textContent = text;
+          messageDiv.style.opacity = "1";
         }
       } catch (err) {
         messageDiv.style.color = 'red';

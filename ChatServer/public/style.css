@@ -242,8 +242,9 @@ video{
 .login-container {
   background-color: rgba(30, 30, 30, 0.95);
   padding: 40px;
-  padding-top: 30px;
-  border-radius: 12px;
+  padding-top: 25px;
+  padding-bottom: 20px !important;
+  border-radius: 17px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
   width: 90%;
   max-width: 400px;
@@ -319,11 +320,13 @@ video{
   display: none !important;
 }
 #message{
-  margin-top: 30px;
+  margin-top: 20px;
   font-family: "korcyN";
   text-transform: uppercase;
-  font-size: 0.8rem;
+  font-weight: bold;
+  font-size: 0.8em;
   color: white;
+  position: relative;
 }
 .login-container input::placeholder {
     color: #aaaaaa;

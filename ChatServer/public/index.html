@@ -16,6 +16,9 @@
       flex-direction: column;
       align-items: center;
     }
+    .login-container {
+      padding-bottom: 55px !important;
+    }
   </style>
 </head>
 <body id="index">
@@ -33,10 +36,7 @@
     function joinChat(event) {
       event.preventDefault();
       const roomCode = document.getElementById('roomCode').value.trim();
-      const username = localStorage.getItem('chatUsername');
-      const password = localStorage.getItem('password');
-      if (roomCode && username && password) {
-        localStorage.setItem('chatUsername', username);
+      if (roomCode) {
         localStorage.setItem('chatRoom', roomCode);
         window.location.href = 'chat.html';
       }
