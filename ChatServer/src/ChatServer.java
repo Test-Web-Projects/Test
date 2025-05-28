@@ -1,38 +1,49 @@
 import com.sun.net.httpserver.*;
+import javax.net.ssl.*;
 import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
-import java.security.MessageDigest;
+import java.security.*;
 import java.util.*;
 import java.util.concurrent.*;
-
 
 public class ChatServer {
     private static final int PORT = 8080;
     private static final String PUBLIC_DIR = "public";
-
-    // Mappa dei messaggi per stanza
     private static final Map<String, List<String>> rooms = new ConcurrentHashMap<>();
 
-    public static void main(String[] args) throws IOException {
-        HttpServer server = HttpServer.create(new InetSocketAddress(PORT), 0);
+    public static void main(String[] args) throws Exception {
+        // HTTPS Setup
+        HttpsServer server = HttpsServer.create(new InetSocketAddress(PORT), 0);
+        char[] pass = "123456".toCharArray(); // ⚠️ Sostituisci con la tua password
 
-        // Endpoint per inviare messaggi
+        KeyStore ks = KeyStore.getInstance("JKS");
+        FileInputStream fis = new FileInputStream("C:\\Users\\mar20\\OneDrive\\Desktop\\Progetto_fine\\ChatServer\\src\\keystore.jks");
+        ks.load(fis, pass);
+
+        KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+        kmf.init(ks, pass);
+
+        SSLContext ssl = SSLContext.getInstance("TLS");
+        ssl.init(kmf.getKeyManagers(), null, null);
+
+        server.setHttpsConfigurator(new HttpsConfigurator(ssl));
+
+        // /send
         server.createContext("/send", exchange -> {
             if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
                 String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
                 String[] parts = body.split("&");
                 String room = getValue(parts, "room");
                 String message = getValue(parts, "message");
-                System.out.println(parts[1] + " " + parts[2]);
 
                 rooms.computeIfAbsent(room, k -> new CopyOnWriteArrayList<>()).add(message);
                 sendText(exchange, "OK");
             }
         });
 
-        // Endpoint per ricevere messaggi
+        // /poll
         server.createContext("/poll", exchange -> {
             if ("GET".equalsIgnoreCase(exchange.getRequestMethod())) {
                 String query = exchange.getRequestURI().getQuery();
@@ -58,7 +69,7 @@ public class ChatServer {
             }
         });
 
-        // Endpoint login e registrazione
+        // /login
         server.createContext("/login", exchange -> {
             if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
                 String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
@@ -70,18 +81,16 @@ public class ChatServer {
                     synchronized (ChatServer.class) {
                         File dataDir = new File("data");
                         if (!dataDir.exists()) {
-                            System.out.println("Cartella data inesistente ");
+                            sendText(exchange, "Cartella data inesistente", 500);
                             return;
                         }
 
-                        // File utenti.txt
                         File userFile = new File(dataDir, "utenti.txt");
                         if (!userFile.exists()) {
-                            System.out.println("File utenti.txt inesistente ");
+                            sendText(exchange, "File utenti.txt inesistente", 500);
                             return;
                         }
 
-                        // Leggo utenti esistenti
                         Map<String, String> users = new HashMap<>();
                         try (BufferedReader reader = new BufferedReader(new FileReader(userFile))) {
                             String line;
@@ -95,14 +104,13 @@ public class ChatServer {
 
                         String passwordHash = hashPassword(password);
 
-                        if (users.containsKey(username)) { //Utente gia registrato
+                        if (users.containsKey(username)) {
                             if (users.get(username).equals(passwordHash)) {
                                 sendText(exchange, "✔️ Login avvenuto con successo");
                             } else {
                                 sendText(exchange, "❌ Username o Password errati", 401);
                             }
-                        } else { //Utente non registrato
-                            System.out.println("Aggiungo utente: " + username);
+                        } else {
                             try (BufferedWriter writer = new BufferedWriter(new FileWriter(userFile, true))) {
                                 writer.write(username + ":" + passwordHash);
                                 writer.newLine();
@@ -114,7 +122,7 @@ public class ChatServer {
             }
         });
 
-        // Serve file statici (html, js, css)
+        // Serve file statici
         server.createContext("/", exchange -> {
             URI uri = exchange.getRequestURI();
             String path = uri.getPath();
@@ -124,8 +132,8 @@ public class ChatServer {
                 String mime = Files.probeContentType(file.toPath());
                 exchange.getResponseHeaders().set("Content-Type", mime != null ? mime : "application/octet-stream");
                 exchange.sendResponseHeaders(200, file.length());
-                try (OutputStream os = exchange.getResponseBody(); FileInputStream fis = new FileInputStream(file)) {
-                    fis.transferTo(os);
+                try (OutputStream os = exchange.getResponseBody(); FileInputStream fis2 = new FileInputStream(file)) {
+                    fis2.transferTo(os);
                 }
             } else {
                 sendText(exchange, "404 Not Found", 404);
@@ -134,8 +142,7 @@ public class ChatServer {
 
         server.setExecutor(Executors.newCachedThreadPool());
         server.start();
-        System.out.println("✅ Server in esecuzione su http://" + getLocalIP() + ":" + PORT);
-
+        System.out.println("✅ Server HTTPS in esecuzione su https://" + getLocalIP() + ":" + PORT);
     }
 
     private static String getValue(String[] pairs, String key) {
@@ -153,7 +160,7 @@ public class ChatServer {
     }
 
     private static void sendText(HttpExchange exchange, String response, int statusCode) throws IOException {
-        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*"); // CORS
+        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
         byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
         exchange.sendResponseHeaders(statusCode, bytes.length);
         try (OutputStream os = exchange.getResponseBody()) {
