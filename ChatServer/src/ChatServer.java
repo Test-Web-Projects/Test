@@ -16,7 +16,7 @@ public class ChatServer {
     public static void main(String[] args) throws Exception {
         // HTTPS Setup
         HttpsServer server = HttpsServer.create(new InetSocketAddress(PORT), 0);
-        char[] pass = "123456".toCharArray(); // ⚠️ Sostituisci con la tua password
+        char[] pass = "123456".toCharArray(); // ⚠
 
         KeyStore ks = KeyStore.getInstance("JKS");
         FileInputStream fis = new FileInputStream("C:\\Users\\mar20\\OneDrive\\Desktop\\Progetto_fine\\ChatServer\\src\\keystore.jks");

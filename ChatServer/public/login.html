@@ -70,7 +70,7 @@
       }
     };
 
-    // Gestione submit form: login/registrazione
+    // login/registrazione
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
 
@@ -99,10 +99,9 @@
           messageDiv.textContent = text;
           messageDiv.style.opacity = "1";
 
-          // Salvo solo username (non password) in localStorage
           localStorage.setItem('chatUsername', username);
 
-          // Dopo 1.5 secondi redirect a index.html (chat vera)
+          // Indirizzamento a index.html (Inserimento codice Chat)
           setTimeout(() => {
             window.location.href = 'index.html';
           }, 100);
