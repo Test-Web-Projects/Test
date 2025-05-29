@@ -48,22 +48,9 @@ body{
   cursor: pointer;
   
 }
-@keyframes zoom {
-  0%{ box-shadow: -2px 2px 25px white; }
-  50%{ box-shadow: -2px 2px 10px white; }
-  100%{ box-shadow: -2px 2px 25px white; }
-}
-
-@keyframes zoom1 {
-  0%{ width: 22px; }
-  50%{ width: 18px; }
-  100%{ width: 22px; }
-}
 
 .libro {
-  position: fixed;
-  top: 4.6rem;
-  left: 5.2rem;
+  position: absolute;
   background-color: rgb(0, 0, 0);
   border-radius: 100%;
   padding-top: 7px;
@@ -72,9 +59,67 @@ body{
   padding-right: 8px;
   border: 2px solid wheat;
   box-shadow: -2px 2px 10px white;
-  animation: zoom 3s infinite;
+  top: 4.4rem;
+  left: 5rem;
 }
 
+@keyframes glow {
+  0%{ box-shadow: -2px 2px 10px white; }
+  50%{ box-shadow: -2px 2px 25px white; }
+  100%{ box-shadow: -2px 2px 10px white; }
+}
+
+@keyframes zoomCombined {
+  0% {
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    transform: scale(1.1) rotate(5deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.libro:hover {
+  animation: zoomCombined 3s infinite, glow 3s infinite;
+}
+
+
+.cont_testo{
+  position: fixed;
+  top: 1.2rem;
+  left: 3.6rem;
+}
+
+.presentazione{
+  color: white;
+  text-align: center;
+  font-size: 0.7rem;
+  font-family: "korcy";
+  text-transform: uppercase;
+  padding: 0;
+  margin: 0;
+}
+
+@keyframes down {
+  0% {
+    margin-top: 0;
+  }
+  50% {
+    margin-top: 5px;
+  }
+  100% {
+    margin-top: 0;
+  }
+}
+
+.cont_testo img{
+  max-width: 22px;
+  display: block;
+  margin: 0 auto;
+  animation: down 1.2s infinite;
+}
 
 video{
     position:absolute;
