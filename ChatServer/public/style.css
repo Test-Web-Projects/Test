@@ -46,7 +46,6 @@ body{
   position: relative;
   z-index: 9999;
   cursor: pointer;
-  
 }
 
 .libro {
@@ -447,10 +446,8 @@ video{
   margin-top: 20px;
 }
 
-/*
-@media only screen {
-
-  body{
+@media only screen and (max-width: 768px) {
+  body {
     max-width: 100%;
     overflow: hidden;
     align-items: center;
@@ -465,49 +462,87 @@ video{
     text-align: center;
     text-shadow: -2px 2px 13px black;
     font-style: italic;
-}
+  }
 
-.login-container {
-  padding: 50px !important;
-  padding-top: 20px !important;
-  width: 60% !important;
-  max-width: 200px;
-  text-align: center;
-}
-.login-container h2 {
-  font-family: "slim", sans-serif;
-  color: #fff;
-  margin-bottom:1rem;
-  font-size: 1rem;
-}
-.login-container input {
-  max-height: 45px !important;
-  max-width: 90%;
-}
+  .login-container {
+    padding: 50px !important;
+    padding-top: 20px !important;
+    width: 60% !important;
+    max-width: 200px;
+    text-align: center;
+  }
 
-.login-container button {
-  width: 100%;
+  .login-container h2 {
+    font-family: "slim", sans-serif;
+    color: #fff;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+  }
+
+  .login-container input {
+    max-height: 45px !important;
+    max-width: 90%;
+  }
+
+  .login-container button {
+    width: 100%;
+  }
+
+  #password::placeholder {
+    color: #aaaaaa !important;
+  }
+
+  .input_password {
+    max-height: 45px !important;
+    max-width: 90%;
+  }
+
+  video {
+    width: 100% !important;
+  }
+
+  #index .login-container {
+    margin-top: 4.5rem !important;
+    padding: 45px !important;
+  }
+
+  .div_freccia img{
+    max-width: 17px;
+    margin: 0;
+  }
+
+  .libro img{
+    max-width: 17px;
+  }
+
+  .libro{
+    top: auto;
+    bottom: 1rem;
+    left: 2rem;
+  }
+
+  .cont_testo{
+    font-size: 0.5rem;
+    top: auto;
+    bottom: 3.6rem;
+    left: 0.5rem;
+    position: fixed;
+  }
+  .presentazione{
+    animation: none;
+  }
+  @keyframes down {
+    0% {
+      margin-bottom: 0px;
+    }
+    50% {
+      margin-bottom: 3px;
+    }
+    100% {
+      margin-bottom: 0px;
+    }
+  }
+  .cont_testo img{
+    animation: down 1.2s infinite !important;
+  }
 }
-#password::placeholder{
-  height: 35px;
-}
-#password::placeholder{
-  color: #aaaaaa !important;
-}
-.input_password{
-  max-height: 45px !important;
-  max-width: 90%;
-}
-video{
-  width: 100%;
-}
-#index .login-container{
-  margin-top: 4.5rem !important;
-  padding: 45px !important;
-}
-.freccia{
-  padding: 0;
-  margin: 0;
-}
-}
-*/
