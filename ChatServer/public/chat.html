@@ -35,7 +35,7 @@
   <script>
     const chat = document.getElementById('chat');
     const username = localStorage.getItem("chatUsername");
-    const roomCode = localStorage.getItem('chatRoom');
+    const roomCode = localStorage.getItem('chatRoom');    
 
     function entra () {
       if (sessionStorage.getItem("alreadyJoined") === "true") return;
@@ -163,7 +163,7 @@
         });
     }
 
-    setInterval(pollMessages, 100);
+    setInterval(pollMessages, 600);
 
     
 
