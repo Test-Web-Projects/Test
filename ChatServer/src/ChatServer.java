@@ -19,7 +19,7 @@ public class ChatServer {
         char[] pass = "123456".toCharArray(); // ⚠
 
         KeyStore ks = KeyStore.getInstance("JKS");
-        FileInputStream fis = new FileInputStream("C:\\Users\\mar20\\OneDrive\\Desktop\\Progetto_fine\\ChatServer\\src\\keystore.jks");
+        FileInputStream fis = new FileInputStream("keystore.jks");
         ks.load(fis, pass);
 
         KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
