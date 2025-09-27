@@ -8,6 +8,6 @@ COPY . .
 RUN javac -d out $(find . -name "*.java")
 
 # Esegui la classe principale (sostituisci col package corretto)
-CMD ["java", "-cp", "out", "Progetto_fine.ChatServer.ChatServer"]
+CMD ["java", "ChatServer"]
 
 EXPOSE 8080
