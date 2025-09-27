@@ -7,7 +7,7 @@ COPY . .
 # Compila tutti i .java nella cartella out
 RUN javac -d out $(find . -name "*.java")
 
-# Esegui la classe principale (sostituisci col package corretto)
-CMD ["java", "ChatServer"]
+# Esegui la classe principale senza package
+CMD ["java", "-cp", "out", "ChatServer"]
 
 EXPOSE 8080
