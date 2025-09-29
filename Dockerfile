@@ -9,7 +9,7 @@ WORKDIR /app
 COPY ChatServer/ProgettoChat.jar app.jar
 
 # Copia i file web (HTML, CSS, JS) nella cartella static se servono
-COPY static ./static
+COPY ChatServer/public ./static
 
 # Esponi la porta del server Java (cambia se il tuo server usa un'altra porta)
 EXPOSE 8080
