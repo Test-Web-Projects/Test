@@ -1,5 +1,6 @@
 # Usa immagine JRE leggera
-FROM eclipse-temurin:17-jre
+FROM eclipse-temurin:17-jre-focal
+
 
 # Cartella di lavoro nel container
 WORKDIR /app
