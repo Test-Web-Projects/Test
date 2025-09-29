@@ -6,7 +6,7 @@ FROM eclipse-temurin:17-jre-focal
 WORKDIR /app
 
 # Copia il jar già compilato
-COPY ProgettoChat.jar app.jar
+COPY ChatServer/ProgettoChat.jar app.jar
 
 # Copia i file web (HTML, CSS, JS) nella cartella static se servono
 COPY static ./static
