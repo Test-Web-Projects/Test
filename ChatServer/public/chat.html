@@ -4,8 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="style.css" />
-  <link rel="icon" href="immagini/Icona.ico">
-  <title>Chat - SELENICHAT</title>
+  <title>Chat Semplice</title>
   <style>
     body {
       font-family: "bodyfont", sans-serif;
@@ -18,157 +17,82 @@
     }
   </style>
 </head>
-<body onload="entra()">
-  <video src="video/video_chat.mp4" muted autoplay loop></video>
-  <div class="chat_container">
-    <div class="chat_header">
-      <div class="chat_title" id="chatTitle"></div>
-      <button draggable="false" class="butEsci" onclick=extiChat()>EXIT</button>
+<body>
+  <div class="chat-container">
+    <div class="chat-header">
+      <div class="chat_title" id="chatTitle">💬</div>
+      <button class="butEsci" onclick=extiChat(event)>EXIT</button>
     </div>
     <div class="messages" id="chat"></div>
     <div class="input-container">
-        <input autocomplete="off" type="text" id="messageInput" placeholder="Scrivi un messaggio..." />
-        <div class="div_bottone"><button draggable="false" type="submit" class="butInvia" onclick="sendMessage()"><img draggable="false" src="immagini/communication.png"></button></div>
+      <input type="text" id="messageInput" placeholder="Scrivi un messaggio..." />
+      <button onclick="sendMessage()">Invia</button>
     </div>
   </div>
 
   <script>
-    const chat = document.getElementById('chat');
-    const username = localStorage.getItem("chatUsername");
-    const roomCode = localStorage.getItem('chatRoom');    
+  const chat = document.getElementById('chat');
+  const username = localStorage.getItem("chatUsername");
+  const roomCode = localStorage.getItem('chatRoom');
+  document.getElementById('chatTitle').textContent = `chat: ${roomCode+"💬"}`;
 
-    function entra () {
-      if (sessionStorage.getItem("alreadyJoined") === "true") return;
-      sessionStorage.setItem("alreadyJoined", "true");
+  const shownMessages = new Set();
 
-      const timestamp = new Date().toLocaleTimeString();
-      const systemMessage = `[SYSTEM]${timestamp}<br>${username}: è entrato/a nella chat`;
+  function sendMessage() {
+    const input = document.getElementById('messageInput');
+    const text = input.value.trim();
+    if (!text) return;
 
-      fetch('/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `username=system&room=${encodeURIComponent(roomCode)}&message=${encodeURIComponent(systemMessage)}`
-      });
-    }
+    const timestamp = new Date().toLocaleTimeString();
+    const message = `${timestamp}<br>${username}: ${text}`;
 
-    function extiChat() {
-      const timestamp = new Date().toLocaleTimeString();
-      const systemMessage = `[SYSTEM]${timestamp}<br>${username}: è uscito/a dalla chat`;
-
-      fetch('/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `username=system&room=${encodeURIComponent(roomCode)}&message=${encodeURIComponent(systemMessage)}`
-      }).finally(() => {
-          sessionStorage.removeItem("alreadyJoined");
-          window.location.href = 'index.html';
-      });
-    }
-        
-    
-    document.getElementById('chatTitle').textContent = `SeleniChat: ${roomCode + "💬"}`;
-
-    const shownMessages = new Set();
-
-    // Escape di HTML 
-    function escapeHTML(str) {
-      return str
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-    }
-
-    
-    function formatMessage(rawMsg) {
-      const safe = escapeHTML(rawMsg);
-      return safe.replace(/&lt;br&gt;/g, "<br>"); 
-    }
-
-    function sendMessage() {
-      const input = document.getElementById('messageInput');
-      const text = input.value.trim();
-      if (!text) return;
-
-      const timestamp = new Date().toLocaleTimeString();
-      const message = `${timestamp}<br>${username}: ${text}`;
-
-      fetch('/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `username=${encodeURIComponent(username)}&room=${encodeURIComponent(roomCode)}&message=${encodeURIComponent(message)}`
-      });
-
-      input.value = '';
-    }
-
-    // Permette l'invio del messaggio con il tasto Invio
-    document.getElementById('messageInput').addEventListener('keydown', function (event) {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            sendMessage();
-          }
+    fetch('/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `room=${encodeURIComponent(roomCode)}&message=${encodeURIComponent(message)}`
     });
 
-    function pollMessages() {
-      fetch(`/poll?room=${encodeURIComponent(roomCode)}`)
-        .then(response => response.text())
-        .then(data => {
-          const messages = data.trim().split('\n');
+    input.value = '';
+  }
 
-          messages.forEach(msg => {
-            if (msg.trim() === '') return;
+  function pollMessages() {
+    fetch(`/poll?room=${encodeURIComponent(roomCode)}`)
+      .then(response => response.text())
+      .then(data => {
+        const messages = data.trim().split('\n');
 
-              if (!shownMessages.has(msg)) {
-                shownMessages.add(msg);
+        messages.forEach(msg => {
+          if (msg.trim() === '') return;  // <-- IGNORA messaggi vuoti
 
-                if (msg.includes('[SYSTEM]')) {
-                  const systemDiv = document.createElement('div');
-                  systemDiv.className = 'system-message';
+          if (!shownMessages.has(msg)) {
+            shownMessages.add(msg);
 
-                  let formatted1 = formatMessage(msg);
-                  const match1 = formatted1.match(/<br>([^:]+):/);
-                  const user1 = match1[1];
-                  formatted1 = formatted1.replace(`${user1}:`, `<span class="username">${user1}</span>:`);
-                  formatted1 = formatted1.replace(`[SYSTEM]`, ``);
+            const cont_messageU = document.createElement('div');
+            cont_messageU.className = 'blocco_messaggi';
 
-                  systemDiv.innerHTML = formatted1;
-                  chat.appendChild(systemDiv);
-                  chat.scrollTop = chat.scrollHeight;
-                  return;
-                }
-
-              const cont_messageU = document.createElement('div');
-              cont_messageU.className = 'blocco_messaggi';
-
-              const userMessage = document.createElement('div');
-              if (msg.includes(username)) {
-                userMessage.className = 'message user';
-              } else {
-                userMessage.className = 'message other';
-              }
-
-              let formatted = formatMessage(msg);
-              const match = formatted.match(/<br>([^:]+):/);
-              const user = match[1];
-              formatted = formatted.replace(`${user}:`, `<span class="username">${user}</span>:`);
-              
-
-              userMessage.innerHTML = formatted;
-              cont_messageU.appendChild(userMessage);
-              chat.appendChild(cont_messageU);
-
-              chat.scrollTop = chat.scrollHeight;
+            const userMessage = document.createElement('div');
+            if (msg.includes(username)) {
+              userMessage.className = 'message user';
+            } else {
+              userMessage.className = 'message other';
             }
-          });
+
+            userMessage.innerHTML = msg;
+            cont_messageU.appendChild(userMessage);
+            chat.appendChild(cont_messageU);
+
+            chat.scrollTop = chat.scrollHeight;
+          }
         });
-    }
 
-    setInterval(pollMessages, 600);
+      });
+  }
 
-    
+  setInterval(pollMessages, 1000);
 
-  </script>
-
+  function extiChat() {
+    window.location.href = 'index.html';
+  }
 </script>
 
 </body>

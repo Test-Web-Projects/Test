@@ -3,12 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RoomCode - SELENICHAT</title>
+  <title>Entra nella Chat</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="icon" href="immagini/Icona.ico">
   <style>
+    html, body {
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
       font-family: 'bodyfont', sans-serif;
+      background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+        url('immagini/sfondo_indexjpg.jpg');
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
@@ -16,49 +23,31 @@
       flex-direction: column;
       align-items: center;
     }
-    .login-container {
-      padding-bottom: 55px !important;
-    }
   </style>
 </head>
-<body id="index">
-  <div class="cont_testo">
-    <p class="presentazione">Presentazione</p>
-    <img src="immagini/swipe-down.png" alt="">
-  </div>
-  <a class="libro" target="_blank" href="https://www.canva.com/design/DAGodFsI9W8/R4vO6oBIHkZG1LcpNcXwLg/view?utm_content=DAGodFsI9W8&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h7aebb851fd"><img src="immagini/devices (1).png" alt=""></a>
-  <h1 class="titolo">SeleniChat</h1>
-  <video src="video/202302062133.mp4" muted autoplay loop></video>
+<body>
+  <h1 class="titolo">💬 ChatRoom</h1>
   <div class="login-container">
-    <div class="div_freccia" onclick="logout()">
-      <img draggable="false" src="immagini/user.png" alt="">
-    </div>
     <h2>Accedi ad una Chat</h2>
     <form onsubmit="joinChat(event)">
-      <input autocomplete="off" class="normal" type="text" id="roomCode" placeholder="Codice della stanza" required />
-      <button draggable="false" type="submit">Entra</button>
+      <input type="text" id="username" placeholder="Username" required />
+      <input type="text" id="roomCode" placeholder="Codice della stanza" required />
+      <button type="submit">Entra</button>
     </form>
   </div>
 
   <script>
     function joinChat(event) {
       event.preventDefault();
+      const username = document.getElementById('username').value.trim();
       const roomCode = document.getElementById('roomCode').value.trim();
-      if (roomCode) {
+      
+      if (username && roomCode) {
+        localStorage.setItem('chatUsername', username);
         localStorage.setItem('chatRoom', roomCode);
         window.location.href = 'chat.html';
       }
     }
-
-    function logout() {
-      localStorage.removeItem('chatUsername');
-      sessionStorage.clear();
-      window.location.href = '/'; // Torna alla pagina di login
-    }
   </script>
-
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/flickity/2.2.2/flickity.pkgd.min.js" integrity="sha512-cA8gcgtYJ+JYqUe+j2JXl6J3jbamcMQfPe0JOmQGDescd+zqXwwgneDzniOd3k8PcO7EtTW6jA7L4Bhx03SXoA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
 </body>
 </html>
